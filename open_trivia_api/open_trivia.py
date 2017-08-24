@@ -109,11 +109,3 @@ class OpenTrivia(object):
 	def get_trivia_questions(self):
 		return self.__trivia_questions
 
-
-
-#if __name__ == "__main__":
-#	questions = OpenTrivia(amount = 12, question_type = TriviaType.MULTIPLE_CHOICE, category = TriviaCategory.VIDEO_GAMES).get_trivia_questions()
-#	i = 1
-#	for question in questions:
-#		print(str(i) + ". " + (str(question.get_question())).replace("&#039;", "'").replace("&quot;", "\""))
-#		i += 1
