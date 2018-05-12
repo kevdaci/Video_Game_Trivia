@@ -9,13 +9,14 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.properties import ObjectProperty, NumericProperty
+from kivy.network.urlrequest import UrlRequest
 from kivy.clock import Clock
-from random import randint
-import time
 from uix.buttons import AnswerButton, PurpleButton
 from uix.popups import ScorePopup, ZeroPopup, ErrorPopup, NetworkErrorPopup
-from open_trivia_api.open_trivia import TriviaCategory, TriviaType, Difficulty, TriviaQuestion, OpenTrivia
 from scores_tracking import ScoresTracking
+
+from random import randint
+import time
 
 
 class StartScreen(Screen):
@@ -25,14 +26,28 @@ class QuestionScreen(Screen):
 
 	def __init__(self, **kwargs):
 		super(QuestionScreen, self).__init__(**kwargs)
+		self.button_choices = []
+		self.question_number = 0
+		self.score = 0
+		self.trivia_questions = []
 		try:
-			self.trivia_questions = OpenTrivia(amount = 10, category = TriviaCategory.VIDEO_GAMES, question_type = TriviaType.MULTIPLE_CHOICE).get_trivia_questions()
-			self.button_choices = []
-			self.question_number = 0
-			self.score = 0
-			self.update_screen()
+			self.trivia_info()
 		except:
 			NetworkErrorPopup().open()
+
+	def trivia_info(self):
+		url_request = ("https://opentdb.com/api.php?amount=" + str(25) + "&category=" + str(15) + "&type=" + str("multiple"))
+		req = UrlRequest(url_request, self.get_trivia_data)
+
+	def get_trivia_data(self, reqeust, response):
+		questions_data = response["results"]
+		for question_data in questions_data:
+			data = {}
+			data["question"] = question_data["question"]
+			data["correct_answer"] = question_data["correct_answer"]
+			data["incorrect_answers"] = question_data["incorrect_answers"]
+			self.trivia_questions.append(data)
+		self.update_screen()
 
 	def initialize_answer_choice_labels(self):
 		self.button_choices = [self.button_a, self.button_b, self.button_c, self.button_d]
@@ -45,11 +60,11 @@ class QuestionScreen(Screen):
 
 	def update_screen(self, timer = 0):
 		self.question_label.text = str(self.question_number + 1) + ". "
-		self.question_label.text += self.replace_weird_characters(self.trivia_questions[self.question_number].get_question())
+		self.question_label.text += self.replace_weird_characters(self.trivia_questions[self.question_number]["question"])
 		self.place_answers()
 
 	def place_answers(self):
-		answer_choices = self.trivia_questions[self.question_number].get_incorrect_answers() + [self.trivia_questions[self.question_number].get_correct_answer()]
+		answer_choices = self.trivia_questions[self.question_number]["incorrect_answers"] + [self.trivia_questions[self.question_number]["correct_answer"]]
 		self.initialize_answer_choice_labels()
 		i = 3
 		while(len(answer_choices) > 0):
@@ -60,15 +75,15 @@ class QuestionScreen(Screen):
 
 	def check_answer(self, answer_choice_button):
 		user_answer = answer_choice_button.answer_choice_label.text[3:]
-		correct_answer = self.replace_weird_characters(self.trivia_questions[self.question_number].get_correct_answer())
+		correct_answer = self.replace_weird_characters(self.trivia_questions[self.question_number]["correct_answer"])
 		is_correct = (user_answer == correct_answer)
 		if(is_correct):
 			answer_choice_button.icon_label.text = "%"
 			answer_choice_button.correct_color()
 			self.score += 1
 			self.question_number += 1
-			if(self.question_number == 10):
-				return "finished"
+			if(self.question_number % 2 == 0):
+				self.trivia_info()
 			Clock.schedule_once(self.update_screen, 0.7)
 			return "correct"
 		else:
@@ -76,11 +91,10 @@ class QuestionScreen(Screen):
 			answer_choice_button.incorrect_color()
 			self.find_correct_answer()
 			return "incorrect"
-
 		return is_correct
 
 	def find_correct_answer(self, time = 0):
-		correct_answer = self.replace_weird_characters(self.trivia_questions[self.question_number].get_correct_answer())
+		correct_answer = self.replace_weird_characters(self.trivia_questions[self.question_number]["correct_answer"])
 		for button_choice in self.button_choices:
 			answer_choice_text = button_choice.answer_choice_label.text[3:]
 			if(answer_choice_text == correct_answer):
@@ -206,6 +220,7 @@ class TriviaScreenManager(ScreenManager):
 
 	def enter_data(self, popup):
 		ScoresTracking().update_scores(popup.name.text, self.final_score)"""
+
 
 class TriviaApp(App):
 
