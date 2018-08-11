@@ -1,4 +1,4 @@
 # Video_Game_Trivia
 A trivia game that tests you knowledge on video games.
 
-![Demo](demo1.gif | width=200)
+<img src="demo1.gif" width="200px"/>
