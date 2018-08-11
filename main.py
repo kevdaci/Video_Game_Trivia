@@ -151,7 +151,8 @@ class FinalScoreScreen(Screen):
 			self.has_entered = True
 
 	def enter_data(self, popup):
-		ScoresTracking().update_scores(popup.name.text, self.final_score)
+		ScoresTracking(popup.name.text, self.final_score).start()
+		#ScoresTracking().update_scores(popup.name.text, self.final_score)
 
 
 class TriviaScreenManager(ScreenManager):

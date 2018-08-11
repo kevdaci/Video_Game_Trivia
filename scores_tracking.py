@@ -1,12 +1,22 @@
+import threading
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-class ScoresTracking(object):
+#class ScoresTracking(object):
+class ScoresTracking(threading.Thread):
 
 	scope = ["https://spreadsheets.google.com/feeds"]
 	creds = ServiceAccountCredentials.from_json_keyfile_name("client_secret.json", scope)
 	client = gspread.authorize(creds)
 	sheet = client.open("VideoGameTriviaApp").sheet1
+
+	def __init__(self, name=None, score=None):
+		threading.Thread.__init__(self);
+		self.name = name
+		self.score = score
+
+	def run(self):
+		self.update_scores(self.name, self.score)
 
 	def update_scores(self, name, score):
 		records = self.sheet.get_all_records()
