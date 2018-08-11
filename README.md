@@ -8,3 +8,6 @@ A trivia game that tests you knowledge on video games. A user is given a number 
 
 
 <img src="demo_gifs/demo1.gif" align="middle" width="230px"/>
+
+
+<img src="demo_gifs/demo2.gif" align="middle" width="230px"/>
