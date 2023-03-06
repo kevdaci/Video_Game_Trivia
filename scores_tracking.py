@@ -2,7 +2,7 @@ import threading
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-#class ScoresTracking(object):
+
 class ScoresTracking(threading.Thread):
 
 	scope = ["https://spreadsheets.google.com/feeds"]
